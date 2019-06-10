@@ -18,4 +18,4 @@
 > 颢霖CAS :  
 > http://10.121.69.161:8443/cas  
 > admin   admin@123 
-
+https://www.javatips.net/api/csrf-jhipster-master/src/main/java/com/mycompany/myapp/Application.java
