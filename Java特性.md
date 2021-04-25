@@ -1,16 +1,21 @@
 [TOC]
 
+## 面试题
 
+### 汇总
 
-## Java特性
-
-### 面试题
-
-#### 中原银行
+#### 集合
 
 1. hashmap的结构，默认扩容因子0.75时，，达到12个元素后什么情况下不会引发扩容？最多能存储多少个元素才引发扩容？
 2. 还是hashmap，和currenthashmap区别，二者结构，原理，hashmap能不能存null，为什么可以？
 3. threadlocal原理，应用之类的；
+4. hashMap hashTable区别
+5. hashMap 1.7 和 1.8实现区别
+
+#### Mybatis
+
+## Java特性
+
 4. 
 
 ### 封装
@@ -26,6 +31,28 @@ Java中的封装是将数据（变量）和作用于数据（方法）的代码�
 
 
 ### 继承
+
+## 算法
+
+### 时间复杂度
+
+算法中的**基本操作的执行次数，为算法的时间复杂度**
+
+时间复杂度和空间复杂度一般都使用大O的渐进表示法进行表示，大O的渐进表示法规则如下：
+
+1、所有常数都用常数1表示。
+2、只保留最高阶项。
+3、如果最高阶项存在且不是1，则去除与这个项的系数，得到的结果就是大O阶
+
+**在刷题时看到题目要求时间复杂度为O(1)，并不是要求函数内部不能含有循环，而是要求循环的次数为常数次。**
+
+### 空间复杂度
+
+空间复杂度算的是变量的个数。
+
+注：递归算法的空间复杂度通常是递归的深度（即递归多少层）
+
+### 重点算法示例
 
 ## JavaWeb
 
@@ -49,9 +76,53 @@ protected：解决private子类不能访问的缺陷，子类可以访问，相�
 
 
 
+##### 集合
 
+###### HashSet
 
+特性：
 
+- 不保证元素顺序
+- 允许为null
+- 线程不安全
+- 不允许有重复元素
+- 底层实现是HashTable
+
+构造函数
+
+```java
+//构造一个新的空集合; 背景HashMap实例具有默认初始容量（16）和负载因子（0.75）
+    public HashSet() {
+        map = new HashMap<>();
+    }
+```
+
+###### HashTable
+
+特性：
+
+- 线程安全,实现方法中基本都添加了synchronized关键字来确保线程同步。
+- 因此性能不及HashMap
+- 不允许null作key
+
+###### HashMap
+
+特性：
+
+- 线程不安全
+
+- 在多线程环境下若使用HashMap需要使用Collections.synchronizedMap()方法来获取一个线程安全的集合
+
+  ```java
+  /**
+  Collections.synchronizedMap()实现原理是Collections定义了一个SynchronizedMap的内部类，这个类实现了Map接口，在调用方法时使用synchronized来保证线程同步,当然了实际上操作的还是我们传入的HashMap实例，简单的说就是Collections.synchronizedMap()方法帮我们在操作HashMap时自动添加了synchronized来实现线程同步，类似的其它Collections.synchronizedXX方法也是类似原理
+  */
+   Map m = Collections.synchronizedMap(new HashMap(...)); 
+  ```
+
+- 如果HashMap用Null作key ，则存储在table数组得第一个节点上，hash值为0
+
+- 
 
 ## Mybatis
 
@@ -133,3 +204,4 @@ protected：解决private子类不能访问的缺陷，子类可以访问，相�
 浅拷贝：copy对象的引用
 
 深拷贝：创建了一个新的对象，并且复制其内的成员变量
+
