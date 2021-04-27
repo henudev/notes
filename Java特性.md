@@ -1,36 +1,35 @@
 [TOC]
 
+## 快捷键
+
+- ctr + k	页内引用
+- ">" 引用
+
 ## 面试题
 
 ### 汇总
 
 #### 集合
 
-1. hashmap的结构，默认扩容因子0.75时，，达到12个元素后什么情况下不会引发扩容？最多能存储多少个元素才引发扩容？
+1. hashmap的结构，默认扩容因子0.75时，达到12个元素后什么情况下不会引发扩容？最多能存储多少元素才引发扩容？
+
+   [解析](#hashMap扩容)
+
 2. 还是hashmap，和currenthashmap区别，二者结构，原理，hashmap能不能存null，为什么可以？
-3. threadlocal原理，应用之类的；
-4. hashMap hashTable区别
-5. hashMap 1.7 和 1.8实现区别
+
+1. threadlocal原理，应用之类的；
+2. hashMap hashTable区别
+3. hashMap 1.7 和 1.8实现区别
 
 #### Mybatis
 
-## Java特性
+### 面试题解析
 
-4. 
+#### hashMap扩容
 
-### 封装
+index0 11个全部hash冲突，后面15个index全部没有hash冲突，所以最多26个
 
-Java中的封装是将数据（变量）和作用于数据（方法）的代码作为一个单元一起包装的机制。在封装中，类的变量将从其他类隐藏，并且只能通过其当前类的方法访问。因此，它也被称为数据隐藏。
-
-> 好好理解，好好思考
-
-思考问题：Java 属性为什么要设置为private而不用public
-
-### 多态
-
-
-
-### 继承
+![](Java特性.assets/image-20210426110622648.png)
 
 ## 算法
 
@@ -56,9 +55,56 @@ Java中的封装是将数据（变量）和作用于数据（方法）的代码�
 
 ## JavaWeb
 
-### servlet
+### Servlet
 
 1.servletContext生命周期跟web容器生命周期是保持一致的
+
+### Mybatis
+
+#### 原理
+
+
+
+#### 配置的重点问题
+
+1、如果引用的时mybatis-spring-boot-starter包，MyBatis-Spring-Boot-Starter会做以下操作：
+
+- 自动检测到一个存在的数据源
+
+- 创建并注册一个SqlSessionFactory对象，并将这个数据源传入SqlSessionFactory对象
+
+- 将创建并注册SqlSessionTemplate的实例从SqlSessionFactory中获取的
+
+- Auto-scan your mappers, link them to the `SqlSessionTemplate` and register them to Spring context so they can be injected into your beans
+
+  > ```shell
+  > 注意：以上有个前提，是你的Mapper接口跟你的Mapper.xml文件在同一个目录下，如果接口文件和xml是分开放置，比如xml文件在resource目录下，则需要手动配置SqlSessionFactory，并设定好xml扫描路径，此时yml文件中的mybatis.mapper-locations将不会起作用
+  > ```
+
+- 手动注入SqlSessionFactoryBean示例
+
+  ```java
+      @Bean
+      public SqlSessionFactoryBean sqlSessionFactory () throws IOException {
+          SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
+          sqlSessionFactory.setDataSource(dataSource);
+          /**
+           * 如果自定义了SqlSessionFactoryBean，那么配置文件中的mybatis:mapper-locations将不会起作用，需要在此set
+           */
+          sqlSessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
+          return sqlSessionFactory;
+      }
+  ```
+
+- mapper.xml文件中jdbcType中必须是大写，无语
+
+  ```xml
+  <resultMap id="BasicResultMap" type="cn.qz.mybatis.entity.UserInfoEntity">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="name"  jdbcType="VARCHAR" property="name" />
+  ```
+
+- 
 
 ## 核心知识卷一
 
@@ -66,15 +112,24 @@ Java中的封装是将数据（变量）和作用于数据（方法）的代码�
 
 ##### 修饰符
 
-public：公用属性，其他类都可以调用
+public
 
-private：私有属性，是最严格的，只有当前类可以调用，继承的子类也不可访问
+> - 公用属性，其他类都可以调用
 
-protected：解决private子类不能访问的缺陷，子类可以访问，相同包内也可以访问
+private
 
-1. 一个类的方法操作另一个类的对象，我们就说这个类依赖另一个类
+> - 私有属性，是最严格的，只有当前类可以调用，继承的子类也不可访问
 
+protected
 
+> - 解决private子类不能访问的缺陷，子类可以访问，相同包内也可以访问
+> - 一个类的方法操作另一个类的对象，我们就说这个类依赖另一个类
+> - 
+
+final
+
+> - 此变量只能被赋值一次
+> - 命名字母全大写
 
 ##### 集合
 
@@ -122,48 +177,19 @@ protected：解决private子类不能访问的缺陷，子类可以访问，相�
 
 - 如果HashMap用Null作key ，则存储在table数组得第一个节点上，hash值为0
 
+- 1.7版本采用头插法，1.8以后采用数组+链表+红黑树（bucket长度超过8就转化成红黑树，如果缩减至小于6之后，则重新退化成链表，达到性能均衡）
+
+- （**JDK1.7**）HashMap在并发执行put操作时，多线程会导致HashMap的Entry链表形成环形数据结构，一旦形成环行数据结构，Entry的next节点永不为空，就会产生死循环获取Entry。
+
+- HashMap不能保证随着时间的推移Map中的元素次序是不变的，如果想考虑顺序存储可以使用LinkedHashMap
+
+###### ConcurrentHashMap
+
+特性
+
 - 
 
 ## Mybatis
-
-### 配置的坑
-
-1、如果引用的时mybatis-spring-boot-starter包，MyBatis-Spring-Boot-Starter会做以下操作：
-
-- 自动检测到一个存在的数据源
-
-- 创建并注册一个SqlSessionFactory对象，并将这个数据源传入SqlSessionFactory对象
-
-- 将创建并注册SqlSessionTemplate的实例从SqlSessionFactory中获取的
-
-- Auto-scan your mappers, link them to the `SqlSessionTemplate` and register them to Spring context so they can be injected into your beans
-
-  > ```shell
-  > 注意：以上有个前提，是你的Mapper接口跟你的Mapper.xml文件在同一个目录下，如果接口文件和xml是分开放置，比如xml文件在resource目录下，则需要手动配置SqlSessionFactory，并设定好xml扫描路径，此时yml文件中的mybatis.mapper-locations将不会起作用
-  > ```
-
-- 手动注入SqlSessionFactoryBean示例
-
-  ```java
-      @Bean
-      public SqlSessionFactoryBean sqlSessionFactory () throws IOException {
-          SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
-          sqlSessionFactory.setDataSource(dataSource);
-          /**
-           * 如果自定义了SqlSessionFactoryBean，那么配置文件中的mybatis:mapper-locations将不会起作用，需要在此set
-           */
-          sqlSessionFactory.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocations));
-          return sqlSessionFactory;
-      }
-  ```
-
-- mapper.xml文件中jdbcType中必须是大写，无语
-
-  ```xml
-  <resultMap id="BasicResultMap" type="cn.qz.mybatis.entity.UserInfoEntity">
-      <id column="id" jdbcType="INTEGER" property="id" />
-      <result column="name"  jdbcType="VARCHAR" property="name" />
-  ```
 
 - 
 
