@@ -27,7 +27,9 @@
 
 ##### hashMap扩容
 
-index0 11个全部hash冲突，后面15个index全部没有hash冲突，所以最多26个
+jdk8:size大于threshold的时候扩容,12
+
+jkd7:index0 11个全部hash冲突，后面15个index全部没有hash冲突，所以最多26个
 
 ![](Java特性.assets/image-20210426110622648.png)
 
@@ -112,7 +114,7 @@ index0 11个全部hash冲突，后面15个index全部没有hash冲突，所以�
 
 生成doc文档
 
-javadoc -d tartgetDir dir/*.jar
+javadoc -d tartgetDir package1  package2
 
 ##### 修饰符
 
