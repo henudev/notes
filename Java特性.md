@@ -65,6 +65,7 @@ Servlet的生命周期
 
 ```java
 // 1.加载和实例化
+
 // 2.初始化
 // 3.请求处理
 // 4.服务终止
@@ -117,7 +118,13 @@ Servlet的生命周期
       <result column="name"  jdbcType="VARCHAR" property="name" />
   ```
 
-- 
+  
+
+#### 4.3 事务
+
+##### 4.3.1 概念
+
+
 
 ## 5 核心知识卷一
 
