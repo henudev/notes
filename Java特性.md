@@ -77,7 +77,39 @@ Servlet的生命周期
 
 ##### 4.2.1 原理
 
+**spring 处理Mapper**
 
+> - 当代码中需要使用到一个mapper时候，首先去spring容器中寻找，调用MapperFactoryBean中的getObject方法，获取，然后保存到容器。
+>
+>   ```java
+>     public T getObject() throws Exception {
+>       return getSqlSession().getMapper(this.mapperInterface);
+>     }
+>   ```
+>
+> - 根据上边代码可以看出，getSqlSession()会获取一个SqlSession
+>
+> - 
+>
+>   **因此：一个MapperFactoryBean对象拥有一个sqlSession对象。类型是org.mybatis.spring.SqlSessionTemplate**
+>
+>   **重要：spring整合mybatis使用的sqlSession类型是org.mybatis.spring.SqlSessionTemplate**
+
+
+
+**SqlSessionFactory**
+
+> ```java
+> //1. 唯一必要属性：
+> 	DataSource	可以是任意的DataSource对象
+> //2. 常用属性：
+>     configLocation	指定mybatis自身配置文件路径
+> 	mapperLocations	 MyBatis 的映射器 XML 配置文件的位置
+> //3.         
+>         
+> ```
+>
+> 
 
 ##### 4.2.2 配置的重点问题
 
@@ -124,7 +156,90 @@ Servlet的生命周期
 
 ##### 4.3.1 概念
 
+作用范围：事务隔离级别是对不同事务之间来说。
 
+脏读：读了未提交的数据，事务A读到了事务B
+
+可重复读：只能读取事务开启前的数据版本
+
+commit 动作实质：更新修改数据提交数据库服务器，写入日志，仅此而已。
+
+#### 4.4 Filter
+
+##### 4.4.1 核心接口和方法
+
+通常实现Filter接口来实现一些对Http请求或者返回过程的一些增强处理。
+
+**init方法**
+
+```java
+    /**
+     * Called by the web container to indicate to a filter that it is being
+     * placed into service. The servlet container calls the init method exactly
+     * once after instantiating the filter. The init method must complete
+     * successfully before the filter is asked to do any filtering work.
+     * <p>
+     * The web container cannot place the filter into service if the init method
+     * either:
+     * <ul>
+     * <li>Throws a ServletException</li>
+     * <li>Does not return within a time period defined by the web
+     *     container</li>
+     * </ul>
+     * The default implementation is a NO-OP.
+     *
+     * @param filterConfig The configuration information associated with the
+     *                     filter instance being initialised
+     * @throws ServletException if the initialisation fails
+     */
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+        logger.warn("Filer init ::::");
+    }
+```
+
+**doFilter**
+
+```java
+    /**
+     * The <code>doFilter</code> method of the Filter is called by the container
+     * each time a request/response pair is passed through the chain due to a
+     * client request for a resource at the end of the chain. The FilterChain
+     * passed in to this method allows the Filter to pass on the request and
+     * response to the next entity in the chain.
+     * <p>
+     * A typical implementation of this method would follow the following
+     * pattern:- <br>
+     * 1. Examine the request<br>
+     * 2. Optionally wrap the request object with a custom implementation to
+     * filter content or headers for input filtering <br>
+     * 3. Optionally wrap the response object with a custom implementation to
+     * filter content or headers for output filtering <br>
+     * 4. a) <strong>Either</strong> invoke the next entity in the chain using
+     * the FilterChain object (<code>chain.doFilter()</code>), <br>
+     * 4. b) <strong>or</strong> not pass on the request/response pair to the
+     * next entity in the filter chain to block the request processing<br>
+     * 5. Directly set headers on the response after invocation of the next
+     * entity in the filter chain.
+     *
+     * @param request  The request to process
+     * @param response The response associated with the request
+     * @param chain    Provides access to the next filter in the chain for this
+     *                 filter to pass the request and response to for further
+     *                 processing
+     * @throws IOException      if an I/O error occurs during this filter's
+     *                          processing of the request
+     * @throws ServletException if the processing fails for any other reason
+     */
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+
+    }
+```
+
+
+
+> 
 
 ## 5 核心知识卷一
 
