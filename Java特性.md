@@ -154,91 +154,98 @@ Servlet的生命周期
 
 #### 4.3 事务
 
-##### 4.3.1 概念
-
 作用范围：事务隔离级别是对不同事务之间来说。
 
-脏读：读了未提交的数据，事务A读到了事务B
+脏读：
 
-可重复读：只能读取事务开启前的数据版本
+> 读了未提交的数据，事务A读到了事务B
 
-commit 动作实质：更新修改数据提交数据库服务器，写入日志，仅此而已。
+可重复读：
+
+> 只能读取事务开启前的数据版本
+
+commit 动作实质：
+
+> 更新修改数据提交数据库服务器，写入日志，仅此而已。
 
 #### 4.4 Filter
 
-##### 4.4.1 核心接口和方法
-
 通常实现Filter接口来实现一些对Http请求或者返回过程的一些增强处理。
 
-**init方法**
+作用时机：
+
+![image-20210513111821112](Java特性.assets/image-20210513111821112.png)
+
+![image-20210513113125016](Java特性.assets/image-20210513113125016.png)
+
+#### 4.5 Intercepter
+
+作用范围：
+
+>  当你提交对Action(默认是.action结尾的url)的请求时，ServletDispatcher会根据你的请求，去调度并执行相应的Action。在Action执行之前，调用被Interceptor截取，Interceptor在Action执行前后执行。
+
+preHandle():
+
+> 调用时间：Controller方法处理之前
+>
+> 执行顺序：链式Intercepter情况下，Intercepter按照声明的顺序一个接一个执行
+>
+> 若返回false，则中断执行，注意：不会进入afterCompletion
+
+postHandle():
+
+> 调用前提：preHandle返回true
+>
+> 调用时间：Controller方法处理完之后，DispatcherServlet进行视图的渲染之前，也就是说在这个方法中你可以对ModelAndView进行操作
+>
+> 执行顺序：链式Intercepter情况下，Intercepter按照声明的顺序倒着执行。
+>
+> 备注：postHandle虽然post打头，但post、get方法都能处理
+
+afterCompletion():
+
+> 调用前提：preHandle返回true
+>
+> 调用时间：DispatcherServlet进行视图的渲染之后
+>
+> 多用于清理资源
+
+如果注入的时候引用到Service，因为spring Bean加载是在springcontext 之后，而拦截器加载的时间点在springcontext之前,因此自动注入的话，service是null，解决方案也很简单，我们在注册拦截器之前，先将Interceptor 手动进行注入。注意：在registry.addInterceptor()注册的是getMyInterceptor() 实例。
 
 ```java
-    /**
-     * Called by the web container to indicate to a filter that it is being
-     * placed into service. The servlet container calls the init method exactly
-     * once after instantiating the filter. The init method must complete
-     * successfully before the filter is asked to do any filtering work.
-     * <p>
-     * The web container cannot place the filter into service if the init method
-     * either:
-     * <ul>
-     * <li>Throws a ServletException</li>
-     * <li>Does not return within a time period defined by the web
-     *     container</li>
-     * </ul>
-     * The default implementation is a NO-OP.
-     *
-     * @param filterConfig The configuration information associated with the
-     *                     filter instance being initialised
-     * @throws ServletException if the initialisation fails
-     */
+@Configuration
+public class MyMvcConfig implements WebMvcConfigurer {
+
+    @Bean
+    public MyInterceptor getMyInterceptor(){
+        System.out.println("注入了MyInterceptor");
+        return new MyInterceptor();
+    }
+  
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
-        logger.warn("Filer init ::::");
+    public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(getMyInterceptor()).addPathPatterns("/**");
+    }
+}
+```
+
+```java
+// 过滤器用@Order注解控制执行顺序，通过@Order控制过滤器的级别，值越小级别越高越先执行。
+ @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MyInterceptor2()).addPathPatterns("/**").order(2);
+        registry.addInterceptor(new MyInterceptor1()).addPathPatterns("/**").order(1);
+        registry.addInterceptor(new MyInterceptor()).addPathPatterns("/**").order(3);
     }
 ```
 
-**doFilter**
+**两者区别**
 
-```java
-    /**
-     * The <code>doFilter</code> method of the Filter is called by the container
-     * each time a request/response pair is passed through the chain due to a
-     * client request for a resource at the end of the chain. The FilterChain
-     * passed in to this method allows the Filter to pass on the request and
-     * response to the next entity in the chain.
-     * <p>
-     * A typical implementation of this method would follow the following
-     * pattern:- <br>
-     * 1. Examine the request<br>
-     * 2. Optionally wrap the request object with a custom implementation to
-     * filter content or headers for input filtering <br>
-     * 3. Optionally wrap the response object with a custom implementation to
-     * filter content or headers for output filtering <br>
-     * 4. a) <strong>Either</strong> invoke the next entity in the chain using
-     * the FilterChain object (<code>chain.doFilter()</code>), <br>
-     * 4. b) <strong>or</strong> not pass on the request/response pair to the
-     * next entity in the filter chain to block the request processing<br>
-     * 5. Directly set headers on the response after invocation of the next
-     * entity in the filter chain.
-     *
-     * @param request  The request to process
-     * @param response The response associated with the request
-     * @param chain    Provides access to the next filter in the chain for this
-     *                 filter to pass the request and response to for further
-     *                 processing
-     * @throws IOException      if an I/O error occurs during this filter's
-     *                          processing of the request
-     * @throws ServletException if the processing fails for any other reason
-     */
-    @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-
-    }
-```
-
-
-
+> - 过滤器 不能够使用 Spring 容器资源，只能在 Servlet 容器（e.g. tomcat）启动时调用一次，而 拦截器 是 Spring 提供的组件，由 Spring 来管理，因此它能使用 Spring 里的任何资源、对象，例如 Service 对象、数据源、事务管理等等，通过 IoC 注入到 拦截器 中即可。相比较而言，拦截器 要更灵活一些。
+> - 过滤器的实现基于回调函数。而拦截器（代理模式）的实现基于反射
+> - 
+>
 > 
 
 ## 5 核心知识卷一
