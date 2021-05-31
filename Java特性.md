@@ -220,6 +220,18 @@ public class MyMvcConfig implements WebMvcConfigurer {
 > - 
 >
 
+```
+(1)Listener的生命周期是由servlet容器（例如tomcat）管理的，项目启动时上例中的ConfigListener是由servlet容器实例化并调用其contextInitialized方法，而servlet容器并不认得@Autowired注解，因此导致ConfigService实例注入失败。
+
+(2)而spring容器中的bean的生命周期是由spring容器管理的。
+
+注解的方式执行的位置，spring的注入是在filter和listener之后的，（顺序:listener >> filter >> servlet >> spring ）。
+
+如果在监听器中有需要对容器中bean进行引用，就不能采用注解的方式了。只能手动的进行配置文件的读取
+```
+
+
+
 #### 4.6  分布式锁
 
 单机情况下，多个线程间同时访问某个共享资源，通过synchronize/Lock进行对共享资源加锁，如果在分布式系统方式下，共享资源的竞争则是在不同进程间进行，因此必须引入，分布式锁。
